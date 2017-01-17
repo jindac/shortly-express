@@ -2,6 +2,8 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
+var bcrypt = require('bcrypt-nodejs');
+
 
 
 var db = require('./app/config');
@@ -25,16 +27,18 @@ app.use(express.static(__dirname + '/public'));
 
 app.get('/', 
 function(req, res) {
+  // req.body.username ? res.render('index') : res.redirect('/login');
   res.render('index');
 });
 
 app.get('/create', 
 function(req, res) {
+  // req.body.username ? res.render('index') : res.redirect('/login');
   res.render('index');
 });
 
 app.get('/links', 
-function(req, res) {
+function(req, res) {  
   Links.reset().fetch().then(function(links) {
     res.status(200).send(links.models);
   });
@@ -76,7 +80,25 @@ function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
+app.get('/login', 
+function(req, res) {
+  res.render('login');
+});
 
+app.get('/signup', 
+function(req, res) {
+  res.render('signup');
+});
+
+app.post('/signup', 
+function(req, res) {
+  new User({
+    username: req.body.username,
+    password: req.body.password
+  }).save();
+  res.redirect('/');
+  res.end();
+});
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
