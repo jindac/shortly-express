@@ -3,7 +3,7 @@ var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var bcrypt = require('bcrypt-nodejs');
-
+var session = require('express-session');
 
 
 var db = require('./app/config');
@@ -23,25 +23,37 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+// Use the session middleware
+app.use(session({
+  secret: 'cookie monster',
+  saveUninitialized: true,
+  resave: false,
+  cookie: { 
+    secure: false,
+    maxAge: 600000 
+  }
+}));
 
 
 app.get('/', 
 function(req, res) {
-  // req.body.username ? res.render('index') : res.redirect('/login');
-  res.render('index');
+  req.session.user === undefined ? res.redirect('/login') : res.render('index');
 });
 
 app.get('/create', 
 function(req, res) {
-  // req.body.username ? res.render('index') : res.redirect('/login');
-  res.render('index');
+  req.session.user === undefined ? res.redirect('/login') : res.render('index');
 });
 
 app.get('/links', 
-function(req, res) {  
-  Links.reset().fetch().then(function(links) {
-    res.status(200).send(links.models);
-  });
+function(req, res) {
+  if (req.session.user === undefined) {
+    res.redirect('/login');
+  } else {
+    Links.reset().fetch().then(function(links) {
+      res.status(200).send(links.models);
+    });
+  }
 });
 
 app.post('/links', 
@@ -87,9 +99,7 @@ function(req, res) {
 
 app.post('/login', 
 function(req, res) {
-  var username = req.body.username;
-
-  new User({username: username})
+  new User({username: req.body.username})
   .fetch()
   .then(function(model) {
     if (!model) {
@@ -97,7 +107,7 @@ function(req, res) {
     } else {
       bcrypt.compare(req.body.password, model.attributes.password, function(err, match) {
         if (match) {
-          // add session here;
+          req.session.user = req.body.username;
           res.redirect('/');
         } else {
           res.redirect('/login');
@@ -118,8 +128,8 @@ function(req, res) {
     username: req.body.username,
     password: req.body.password
   }).save();
+  req.session.user = req.body.username;
   res.redirect('/');
-  res.end();
 });
 
 /************************************************************/
