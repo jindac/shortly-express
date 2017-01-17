@@ -8,11 +8,8 @@ var User = db.Model.extend({
   tableName: 'users',
   initialize: function() {
     this.on('creating', function(model, attrs, options) {
-      // var salt = bcrypt.genSaltSync(10);
-      var hash = bcrypt.hashSync(model.get('password') /*, salt*/ );
-
+      var hash = bcrypt.hashSync(model.get('password'));
       model.set('password', hash);
-      // model.set('salt', salt);
     });
   }
 });

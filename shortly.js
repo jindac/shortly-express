@@ -85,6 +85,28 @@ function(req, res) {
   res.render('login');
 });
 
+app.post('/login', 
+function(req, res) {
+  var username = req.body.username;
+
+  new User({username: username})
+  .fetch()
+  .then(function(model) {
+    if (!model) {
+      res.redirect('/login');
+    } else {
+      bcrypt.compare(req.body.password, model.attributes.password, function(err, match) {
+        if (match) {
+          // add session here;
+          res.redirect('/');
+        } else {
+          res.redirect('/login');
+        }
+      });
+    }
+  });
+});
+
 app.get('/signup', 
 function(req, res) {
   res.render('signup');
