@@ -26,18 +26,23 @@ app.use(express.static(__dirname + '/public'));
 // Use the session middleware
 app.use(session({
   secret: 'cookie monster',
-  saveUninitialized: true,
+  saveUninitialized: false,
   resave: false,
   cookie: { 
     secure: false,
-    maxAge: 600000 
+    maxAge: 300000
   }
 }));
 
 
-app.get('/', 
+app.get('/',
 function(req, res) {
-  req.session.user === undefined ? res.redirect('/login') : res.render('index');
+  if (req.session.user === undefined) {
+    res.redirect('/login');
+  } else {
+    res.render('index');
+  }
+  // req.session.user === undefined ? res.redirect('/login') : res.render('index');
 });
 
 app.get('/create', 
@@ -130,6 +135,11 @@ function(req, res) {
   }).save();
   req.session.user = req.body.username;
   res.redirect('/');
+});
+
+app.get('/logout', function(req, res) {
+  req.session.destroy();
+  res.redirect('/login');
 });
 
 /************************************************************/

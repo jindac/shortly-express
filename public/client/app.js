@@ -3,7 +3,8 @@ window.Shortly = Backbone.View.extend({
 
   events: {
     'click li a.index': 'renderIndexView',
-    'click li a.create': 'renderCreateView'
+    'click li a.create': 'renderCreateView',
+    'click li a.logout': 'renderLogoutView'
   },
 
   initialize: function() {
@@ -22,12 +23,12 @@ window.Shortly = Backbone.View.extend({
   },
 
   renderIndexView: function(e) {
-    e && e.preventDefault();
+    // e && e.preventDefault();
     this.router.navigate('/', { trigger: true });
   },
 
   renderCreateView: function(e) {
-    e && e.preventDefault();
+    // e && e.preventDefault();
     this.router.navigate('/create', { trigger: true });
   },
 
